@@ -185,7 +185,7 @@
     <div class="login-sub" id="login-sub">Entre na sua conta</div>
     <div class="config-notice" id="config-notice">
       ⚠️ Configure suas credenciais do Supabase no código antes de usar.<br>
-      Substitua <code>SEU_SUPABASE_URL</code> e <code>SEU_SUPABASE_KEY</code> pelos valores do seu projeto.
+      Substitua <code>SEU_https://dmeljdkvgiamchjuosyr.supabase.co</code> e <code>SEU_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtZWxqZGt2Z2lhbWNoanVvc3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyOTM3ODksImV4cCI6MjA5ODg2OTc4OX0.uhqffSuRAclVUG5x4qeDNAWz6O-D1_KCBGAKiHLz_fw</code> pelos valores do seu projeto.
     </div>
     <div class="login-field">
       <span>E-mail</span>
@@ -344,8 +344,8 @@
 //  ⚠️  COLOQUE AQUI SUAS CREDENCIAIS DO SUPABASE
 //  Você vai pegar esses valores no passo a passo abaixo
 // ══════════════════════════════════════════════════════
-const SUPABASE_URL = "https://dmeljdkvgiamchjuosyr.supabase.co ";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtZWxqZGt2Z2lhbWNoanVvc3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyOTM3ODksImV4cCI6MjA5ODg2OTc4OX0.uhqffSuRAclVUG5x4qeDNAWz6O-D1_KCBGAKiHLz_fw";
+const https://dmeljdkvgiamchjuosyr.supabase.co = "https://dmeljdkvgiamchjuosyr.supabase.co ";
+const eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtZWxqZGt2Z2lhbWNoanVvc3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyOTM3ODksImV4cCI6MjA5ODg2OTc4OX0.uhqffSuRAclVUG5x4qeDNAWz6O-D1_KCBGAKiHLz_fw = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtZWxqZGt2Z2lhbWNoanVvc3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyOTM3ODksImV4cCI6MjA5ODg2OTc4OX0.uhqffSuRAclVUG5x4qeDNAWz6O-D1_KCBGAKiHLz_fw";
 // ══════════════════════════════════════════════════════
 
 const UNIT_KEY = "bettrack_unit";
@@ -358,13 +358,13 @@ let currentUser = null;
 // ── SUPABASE HELPERS ──────────────────────────────────────────────────────
 const sb = {
   headers() {
-    const h = { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": "Bearer " + (this._token || SUPABASE_KEY) };
+    const h = { "Content-Type": "application/json", "apikey": eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtZWxqZGt2Z2lhbWNoanVvc3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyOTM3ODksImV4cCI6MjA5ODg2OTc4OX0.uhqffSuRAclVUG5x4qeDNAWz6O-D1_KCBGAKiHLz_fw, "Authorization": "Bearer " + (this._token || eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtZWxqZGt2Z2lhbWNoanVvc3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyOTM3ODksImV4cCI6MjA5ODg2OTc4OX0.uhqffSuRAclVUG5x4qeDNAWz6O-D1_KCBGAKiHLz_fw) };
     return h;
   },
   _token: null,
 
   async signUp(email, password) {
-    const r = await fetch(SUPABASE_URL + "/auth/v1/signup", {
+    const r = await fetch(https://dmeljdkvgiamchjuosyr.supabase.co + "/auth/v1/signup", {
       method: "POST", headers: this.headers(),
       body: JSON.stringify({ email, password })
     });
@@ -372,7 +372,7 @@ const sb = {
   },
 
   async signIn(email, password) {
-    const r = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=password", {
+    const r = await fetch(https://dmeljdkvgiamchjuosyr.supabase.co + "/auth/v1/token?grant_type=password", {
       method: "POST", headers: this.headers(),
       body: JSON.stringify({ email, password })
     });
@@ -382,19 +382,19 @@ const sb = {
   },
 
   async signOut() {
-    await fetch(SUPABASE_URL + "/auth/v1/logout", { method: "POST", headers: this.headers() });
+    await fetch(https://dmeljdkvgiamchjuosyr.supabase.co + "/auth/v1/logout", { method: "POST", headers: this.headers() });
     this._token = null;
   },
 
   async getApostas() {
-    const r = await fetch(SUPABASE_URL + "/rest/v1/apostas?order=date.desc,created_at.desc", {
+    const r = await fetch(https://dmeljdkvgiamchjuosyr.supabase.co + "/rest/v1/apostas?order=date.desc,created_at.desc", {
       headers: { ...this.headers(), "Prefer": "return=representation" }
     });
     return r.json();
   },
 
   async insertAposta(a) {
-    const r = await fetch(SUPABASE_URL + "/rest/v1/apostas", {
+    const r = await fetch(https://dmeljdkvgiamchjuosyr.supabase.co + "/rest/v1/apostas", {
       method: "POST",
       headers: { ...this.headers(), "Prefer": "return=representation" },
       body: JSON.stringify({ date: a.date, valor: a.valor, odd: a.odd, resultado: a.resultado, lucro: a.lucro, bonus: a.bonus || 0, user_id: currentUser.id })
@@ -403,7 +403,7 @@ const sb = {
   },
 
   async updateAposta(id, a) {
-    const r = await fetch(SUPABASE_URL + "/rest/v1/apostas?id=eq." + id, {
+    const r = await fetch(https://dmeljdkvgiamchjuosyr.supabase.co + "/rest/v1/apostas?id=eq." + id, {
       method: "PATCH",
       headers: { ...this.headers(), "Prefer": "return=representation" },
       body: JSON.stringify({ date: a.date, valor: a.valor, odd: a.odd, resultado: a.resultado, lucro: a.lucro })
@@ -412,20 +412,20 @@ const sb = {
   },
 
   async deleteAposta(id) {
-    await fetch(SUPABASE_URL + "/rest/v1/apostas?id=eq." + id, {
+    await fetch(https://dmeljdkvgiamchjuosyr.supabase.co + "/rest/v1/apostas?id=eq." + id, {
       method: "DELETE", headers: this.headers()
     });
   },
 
   async getUnit() {
-    const r = await fetch(SUPABASE_URL + "/rest/v1/configuracoes?user_id=eq." + currentUser.id, {
+    const r = await fetch(https://dmeljdkvgiamchjuosyr.supabase.co + "/rest/v1/configuracoes?user_id=eq." + currentUser.id, {
       headers: this.headers()
     });
     return r.json();
   },
 
   async upsertUnit(value) {
-    await fetch(SUPABASE_URL + "/rest/v1/configuracoes", {
+    await fetch(https://dmeljdkvgiamchjuosyr.supabase.co + "/rest/v1/configuracoes", {
       method: "POST",
       headers: { ...this.headers(), "Prefer": "resolution=merge-duplicates" },
       body: JSON.stringify({ user_id: currentUser.id, unit_value: value })
@@ -532,7 +532,7 @@ async function initApp() {
 // ── STARTUP ───────────────────────────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", async () => {
   // Check if Supabase is configured
-  if (SUPABASE_URL === "SEU_SUPABASE_URL") {
+  if (https://dmeljdkvgiamchjuosyr.supabase.co === "SEU_https://dmeljdkvgiamchjuosyr.supabase.co") {
     document.getElementById("config-notice").style.display = "block";
     document.getElementById("login-btn").disabled = true;
   }
@@ -541,7 +541,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const savedUser = localStorage.getItem("bettrack_user");
   const savedToken = localStorage.getItem("bettrack_token");
 
-  if (savedUser && savedToken && SUPABASE_URL !== "SEU_SUPABASE_URL") {
+  if (savedUser && savedToken && https://dmeljdkvgiamchjuosyr.supabase.co !== "SEU_https://dmeljdkvgiamchjuosyr.supabase.co") {
     try {
       currentUser = JSON.parse(savedUser);
       sb._token = savedToken;
