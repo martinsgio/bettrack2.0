@@ -185,7 +185,7 @@
     <div class="login-sub" id="login-sub">Entre na sua conta</div>
     <div class="config-notice" id="config-notice">
       ⚠️ Configure suas credenciais do Supabase no código antes de usar.<br>
-      Substitua <code>SEU_SUPABASE_URL</code> e <code>SEU_SUPABASE_KEY</code> pelos valores do seu projeto.
+      Substitua <code>https://dmeljdkvgiamchjuosyr.supabase.co</code> e <code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtZWxqZGt2Z2lhbWNoanVvc3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyOTM3ODksImV4cCI6MjA5ODg2OTc4OX0.uhqffSuRAclVUG5x4qeDNAWz6O-D1_KCBGAKiHLz_fw</code> pelos valores do seu projeto.
     </div>
     <div class="login-field">
       <span>E-mail</span>
@@ -534,7 +534,7 @@ async function initApp() {
 // ── STARTUP ───────────────────────────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", async () => {
   // Check if Supabase is configured
-  if (SUPABASE_URL === "SEU_SUPABASE_URL") {
+  if (SUPABASE_URL === "https://dmeljdkvgiamchjuosyr.supabase.co") {
     document.getElementById("config-notice").style.display = "block";
     document.getElementById("login-btn").disabled = true;
   }
@@ -543,7 +543,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const savedUser = localStorage.getItem("bettrack_user");
   const savedToken = localStorage.getItem("bettrack_token");
 
-  if (savedUser && savedToken && SUPABASE_URL !== "SEU_SUPABASE_URL") {
+  if (savedUser && savedToken && SUPABASE_URL !== "https://dmeljdkvgiamchjuosyr.supabase.co") {
     try {
       currentUser = JSON.parse(savedUser);
       sb._token = savedToken;
