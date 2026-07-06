@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ BetTrack</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #0D0F14; color: #E8EAF0; min-height: 100vh; }
+
+  /* ── LOGIN ── */
+  #login-screen { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
+  .login-box { background:#1A1D24; border:1px solid #252836; border-radius:20px; padding:40px 36px; width:100%; max-width:380px; display:flex; flex-direction:column; gap:20px; }
+  .login-logo { font-size:28px; font-weight:800; color:#F0B429; letter-spacing:-0.02em; text-align:center; }
+  .login-sub { text-align:center; color:#8A8FA8; font-size:14px; margin-top:-12px; }
+  .login-field { display:flex; flex-direction:column; gap:6px; font-size:13px; color:#8A8FA8; font-weight:600; }
+  .login-field input { background:#0D0F14; border:1px solid #252836; border-radius:8px; padding:12px 14px; color:#E8EAF0; font-size:15px; font-family:inherit; outline:none; transition:border-color 0.15s; }
+  .login-field input:focus { border-color:#F0B429; }
+  .login-btn { padding:14px; background:#F0B429; color:#0D0F14; border:none; border-radius:10px; font-weight:800; font-size:16px; cursor:pointer; font-family:inherit; transition:background 0.15s; }
+  .login-btn:hover { background:#d9a020; }
+  .login-btn:disabled { opacity:0.5; cursor:not-allowed; }
+  .login-err { color:#E84545; font-size:13px; text-align:center; display:none; }
+  .login-toggle { text-align:center; font-size:13px; color:#8A8FA8; }
+  .login-toggle a { color:#F0B429; cursor:pointer; text-decoration:none; font-weight:600; }
+  .login-toggle a:hover { text-decoration:underline; }
+  .config-notice { background:rgba(240,180,41,0.08); border:1px solid rgba(240,180,41,0.2); border-radius:10px; padding:12px 14px; font-size:12px; color:#F0B429; line-height:1.5; display:none; }
+  .config-notice code { background:rgba(240,180,41,0.15); padding:1px 5px; border-radius:4px; font-size:11px; }
+
+  /* ── APP ── */
+  #app-screen { display:none; }
+
+  /* NAV */
+  nav { display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:60px; border-bottom:1px solid #1E2130; background:#0D0F14; position:sticky; top:0; z-index:10; gap:8px; }
+  .logo { display:flex; align-items:center; gap:8px; font-weight:800; font-size:18px; letter-spacing:-0.02em; color:#F0B429; flex-shrink:0; }
+  .nav-links { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .nav-btn { background:none; border:none; color:#8A8FA8; font-size:14px; padding:6px 12px; border-radius:6px; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+  .nav-btn.active, .nav-btn:hover { color:#E8EAF0; background:#1A1D24; }
+  .nova-btn { background:#F0B429; color:#0D0F14; border:none; border-radius:8px; padding:8px 16px; font-weight:700; font-size:14px; cursor:pointer; font-family:inherit; }
+  .nova-btn:hover { background:#d9a020; }
+  .unit-config-btn { background:none; border:1px solid #252836; border-radius:8px; color:#8A8FA8; font-size:12px; padding:6px 10px; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .unit-config-btn:hover { border-color:#F0B429; color:#F0B429; }
+  .logout-btn { background:none; border:1px solid #252836; border-radius:8px; color:#8A8FA8; font-size:12px; padding:6px 10px; cursor:pointer; font-family:inherit; }
+  .logout-btn:hover { border-color:#E84545; color:#E84545; }
+  .nav-user { font-size:12px; color:#8A8FA8; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* MAIN */
+  main { max-width:1100px; margin:0 auto; padding:32px 24px; }
+  .page-title { font-size:26px; font-weight:800; margin-bottom:24px; letter-spacing:-0.02em; }
+  .section-title { font-size:12px; font-weight:700; margin-bottom:12px; color:#8A8FA8; text-transform:uppercase; letter-spacing:0.06em; }
+
+  /* VIEWS */
+  .view { display:none; }
+  .view.active { display:block; }
+
+  /* KPI GRID */
+  .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:20px; }
+  .kpi-card { background:#1A1D24; border-radius:12px; padding:20px 22px; display:flex; flex-direction:column; gap:2px; border:1px solid #252836; }
+  .kpi-label { color:#8A8FA8; font-size:12px; text-transform:uppercase; letter-spacing:0.08em; }
+  .kpi-value { font-size:28px; font-weight:800; line-height:1.1; margin-top:4px; }
+  .kpi-sub { color:#8A8FA8; font-size:12px; margin-top:2px; }
+
+  /* UNIT BAR */
+  .unit-bar { background:#1A1D24; border-radius:12px; padding:16px 22px; margin-bottom:24px; border:1px solid #252836; }
+  .unit-bar-label { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .unit-bar-track { background:#252836; border-radius:99px; height:8px; overflow:hidden; }
+  .unit-bar-fill { height:100%; border-radius:99px; transition:width 0.6s cubic-bezier(.4,0,.2,1); }
+
+  /* CHART */
+  .chart-box { background:#1A1D24; border-radius:12px; border:1px solid #252836; padding:20px 16px; margin-bottom:32px; }
+  .chart-toggle { display:flex; justify-content:flex-end; gap:8px; margin-bottom:16px; }
+  .chart-toggle button { background:#0D0F14; color:#8A8FA8; border:1px solid #252836; border-radius:6px; padding:4px 12px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+  .chart-toggle button.active { background:#F0B429; color:#0D0F14; border-color:#F0B429; }
+  .chart-area { position:relative; height:220px; }
+  canvas { display:block; }
+
+  /* TABLE */
+  .table-wrap { overflow-x:auto; border-radius:12px; border:1px solid #252836; margin-bottom:32px; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th { text-align:left; padding:12px 16px; color:#8A8FA8; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.06em; border-bottom:1px solid #252836; background:#1A1D24; }
+  td { padding:12px 16px; border-bottom:1px solid #1A1D24; vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+  .badge { display:inline-block; padding:3px 10px; border-radius:99px; font-size:12px; font-weight:600; }
+  .badge.green { background:rgba(0,194,124,0.15); color:#00C27C; }
+  .badge.red { background:rgba(232,69,69,0.15); color:#E84545; }
+
+  /* NOVA ENTRADA */
+  .nova-wrap { max-width:480px; margin:0 auto; }
+  .card { background:#1A1D24; border-radius:16px; padding:28px; border:1px solid #252836; }
+  .form-grid { display:flex; flex-direction:column; gap:16px; margin-bottom:20px; }
+  label.field { display:flex; flex-direction:column; gap:6px; font-size:13px; color:#8A8FA8; font-weight:600; }
+  input[type=date], input[type=number], input[type=text], input[type=email], input[type=password], select.filter-sel {
+    background:#0D0F14; border:1px solid #252836; border-radius:8px;
+    padding:10px 14px; color:#E8EAF0; font-size:16px; font-family:inherit; outline:none; width:100%;
+    transition:border-color 0.15s;
+  }
+  input:focus, select.filter-sel:focus { border-color:#F0B429; }
+  .resultado-row { margin-bottom:20px; }
+  .resultado-label { font-size:13px; color:#8A8FA8; font-weight:600; margin-bottom:8px; }
+  .resultado-btns { display:flex; gap:12px; }
+  .res-btn { flex:1; padding:12px; border:2px solid #252836; border-radius:10px; background:#0D0F14; color:#8A8FA8; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+  .res-btn.green { border-color:#00C27C; color:#00C27C; background:rgba(0,194,124,0.08); }
+  .res-btn.red { border-color:#E84545; color:#E84545; background:rgba(232,69,69,0.08); }
+  .preview-box { border:2px solid; border-radius:12px; padding:16px 20px; margin-bottom:20px; display:none; flex-direction:column; gap:4px; align-items:center; background:#0D0F14; }
+  .preview-label { color:#8A8FA8; font-size:13px; }
+  .preview-value { font-size:28px; font-weight:800; }
+  .preview-breakdown { font-size:12px; color:#8A8FA8; margin-top:2px; }
+  .save-btn { width:100%; padding:14px; background:#F0B429; color:#0D0F14; border:none; border-radius:10px; font-weight:800; font-size:16px; cursor:pointer; font-family:inherit; transition:background 0.15s; }
+  .save-btn:hover { background:#d9a020; }
+  .save-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+  /* BONUS */
+  .bonus-field { display:none; animation:fadeIn 0.2s ease; }
+  .bonus-field.visible { display:flex; }
+  .bonus-tag { display:inline-block; background:rgba(240,180,41,0.15); color:#F0B429; border-radius:6px; padding:2px 8px; font-size:11px; font-weight:700; margin-left:6px; vertical-align:middle; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+
+  /* HIST HEADER */
+  .hist-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+  select.filter-sel { width:auto; font-size:14px; padding:8px 12px; }
+  .action-btns { display:flex; gap:4px; }
+  .delete-btn { background:none; border:none; cursor:pointer; font-size:16px; opacity:0.4; padding:4px; transition:opacity 0.15s; }
+  .delete-btn:hover { opacity:1; }
+  .edit-btn { background:none; border:none; cursor:pointer; font-size:14px; opacity:0.4; padding:4px; transition:opacity 0.15s; filter:grayscale(1); }
+  .edit-btn:hover { opacity:1; filter:none; }
+
+  /* MODALS */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:50; align-items:center; justify-content:center; padding:24px; backdrop-filter:blur(4px); }
+  .modal-overlay.open { display:flex; }
+  .modal { background:#1A1D24; border:1px solid #252836; border-radius:16px; padding:28px; width:100%; max-width:420px; }
+  .modal-title { font-size:18px; font-weight:800; margin-bottom:16px; }
+  .modal-footer { display:flex; gap:10px; margin-top:20px; }
+  .btn-cancel { flex:1; padding:12px; background:#0D0F14; color:#8A8FA8; border:1px solid #252836; border-radius:8px; cursor:pointer; font-family:inherit; font-weight:600; }
+  .btn-save { flex:2; padding:12px; background:#F0B429; color:#0D0F14; border:none; border-radius:8px; cursor:pointer; font-family:inherit; font-weight:800; font-size:15px; }
+
+  /* LOADING */
+  .loading-overlay { position:fixed; inset:0; background:#0D0F14; z-index:100; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
+  .loading-spinner { width:40px; height:40px; border:3px solid #252836; border-top-color:#F0B429; border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text { color:#8A8FA8; font-size:14px; }
+
+  /* SYNCING indicator */
+  .sync-indicator { position:fixed; bottom:24px; left:24px; background:#1A1D24; border:1px solid #252836; border-radius:10px; padding:8px 14px; font-size:12px; color:#8A8FA8; display:none; align-items:center; gap:8px; z-index:50; }
+  .sync-indicator.show { display:flex; }
+  .sync-dot { width:8px; height:8px; border-radius:50%; background:#F0B429; animation:pulse 1s ease infinite; flex-shrink:0; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:24px; right:24px; background:#1A1D24; border:1px solid #252836; border-radius:10px; padding:12px 20px; font-size:14px; font-weight:600; box-shadow:0 8px 32px rgba(0,0,0,0.4); transform:translateY(80px); opacity:0; transition:all 0.3s; z-index:100; }
+  .toast.show { transform:translateY(0); opacity:1; }
+
+  /* EMPTY STATE */
+  .empty { text-align:center; padding:48px 24px; color:#8A8FA8; }
+  .empty-icon { font-size:40px; margin-bottom:12px; }
+
+  /* COLORS */
+  .green { color:#00C27C; }
+  .red { color:#E84545; }
+  .gold { color:#F0B429; }
+  .muted { color:#8A8FA8; }
+
+  @media (max-width:600px) {
+    nav { padding:0 12px; height:auto; min-height:60px; flex-wrap:wrap; padding-top:8px; padding-bottom:8px; }
+    .nav-user { display:none; }
+    main { padding:20px 12px; }
+    .kpi-value { font-size:22px; }
+    .nova-wrap { max-width:100%; }
+    .modal { padding:20px; }
+    .login-box { padding:28px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Carregando BetTrack...</div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen" style="display:none">
+  <div class="login-box">
+    <div class="login-logo">⚡ BetTrack</div>
+    <div class="login-sub" id="login-sub">Entre na sua conta</div>
+    <div class="config-notice" id="config-notice">
+      ⚠️ Configure suas credenciais do Supabase no código antes de usar.<br>
+      Substitua <code>SEU_SUPABASE_URL</code> e <code>SEU_SUPABASE_KEY</code> pelos valores do seu projeto.
+    </div>
+    <div class="login-field">
+      <span>E-mail</span>
+      <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+    </div>
+    <div class="login-field">
+      <span>Senha</span>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="login-err" id="login-err"></div>
+    <button class="login-btn" id="login-btn" onclick="handleAuth()">Entrar</button>
+    <div class="login-toggle">
+      <span id="toggle-text">Não tem conta? </span>
+      <a onclick="toggleMode()">Criar conta</a>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <nav>
+    <div class="logo">⚡ BetTrack</div>
+    <div class="nav-links">
+      <button class="nav-btn active" onclick="showView('dashboard')">Dashboard</button>
+      <button class="nav-btn" onclick="showView('historico')">Histórico</button>
+      <button class="unit-config-btn" onclick="openUnitModal()" title="Configurar valor da unidade">⚙️ 1 UN = <span id="unit-display">R$50</span></button>
+      <span class="nav-user" id="nav-user"></span>
+      <button class="logout-btn" onclick="handleLogout()">Sair</button>
+      <button class="nova-btn" onclick="showView('nova')">+ Nova Entrada</button>
+    </div>
+  </nav>
+
+  <main>
+    <!-- DASHBOARD -->
+    <div id="view-dashboard" class="view active">
+      <h1 class="page-title">Dashboard</h1>
+      <div class="kpi-grid" id="kpi-grid"></div>
+      <div class="unit-bar">
+        <div class="unit-bar-label">
+          <span class="muted" style="font-size:13px">Unidades acumuladas</span>
+          <span id="unit-bar-value" style="font-weight:700;font-size:18px"></span>
+        </div>
+        <div class="unit-bar-track"><div class="unit-bar-fill" id="unit-bar-fill"></div></div>
+      </div>
+      <p class="section-title">Evolução de Unidades por Mês</p>
+      <div class="chart-box">
+        <div class="chart-toggle">
+          <button class="active" id="btn-mensal" onclick="setChartMode('mensal')">Mensal</button>
+          <button id="btn-acumulado" onclick="setChartMode('acumulado')">Acumulado</button>
+        </div>
+        <div class="chart-area"><canvas id="myChart"></canvas></div>
+      </div>
+      <p class="section-title" style="margin-top:0">Resultado por Mês</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Mês</th><th>Investido</th><th>Lucro</th><th>Unidades</th><th>Acerto</th><th>Resultado</th></tr></thead>
+        <tbody id="month-tbody"></tbody>
+      </table></div>
+    </div>
+
+    <!-- NOVA ENTRADA -->
+    <div id="view-nova" class="view">
+      <div class="nova-wrap">
+        <h1 class="page-title">Nova Entrada</h1>
+        <div class="card">
+          <div class="form-grid">
+            <label class="field">Data<input type="date" id="f-date"></label>
+            <label class="field">Valor Apostado (R$)<input type="number" id="f-valor" min="0" step="0.01" placeholder="50,00"></label>
+            <label class="field">ODD<input type="number" id="f-odd" min="1.01" step="0.01" placeholder="2.00"></label>
+            <label class="field bonus-field" id="bonus-field">
+              Aumento Extra (R$) <span class="bonus-tag">🎁 BÔNUS</span>
+              <input type="number" id="f-bonus" min="0" step="0.01" placeholder="0,00">
+              <span style="color:#8A8FA8;font-size:11px;margin-top:2px">Bônus da casa que não entra na ODD — somado ao retorno em caso de GREEN</span>
+            </label>
+          </div>
+          <div class="resultado-row">
+            <div class="resultado-label">Resultado</div>
+            <div class="resultado-btns">
+              <button class="res-btn" id="btn-green" onclick="setResultado('green')">✅ GREEN</button>
+              <button class="res-btn" id="btn-red" onclick="setResultado('red')">❌ RED</button>
+            </div>
+          </div>
+          <div class="preview-box" id="preview-box">
+            <span class="preview-label">Retorno calculado</span>
+            <span class="preview-value" id="preview-value"></span>
+            <span class="preview-breakdown" id="preview-breakdown"></span>
+          </div>
+          <button class="save-btn" id="save-btn" onclick="salvarAposta()">Salvar Aposta</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div id="view-historico" class="view">
+      <div class="hist-header">
+        <h1 class="page-title" style="margin-bottom:0">Histórico</h1>
+        <select class="filter-sel" id="filter-month" onchange="renderHistorico()">
+          <option value="all">Todos os meses</option>
+        </select>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Data</th><th>Valor</th><th>ODD</th><th>Resultado</th><th>Lucro/Perda</th><th></th></tr></thead>
+        <tbody id="hist-tbody"></tbody>
+      </table></div>
+    </div>
+  </main>
+</div>
+
+<!-- TOAST / SYNC -->
+<div class="toast" id="toast"></div>
+<div class="sync-indicator" id="sync-indicator">
+  <div class="sync-dot"></div>
+  <span>Salvando...</span>
+</div>
+
+<!-- MODAL: EDITAR -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="modal-title">✏️ Editar Aposta</div>
+    <div class="form-grid">
+      <label class="field">Data<input type="date" id="edit-date"></label>
+      <label class="field">Valor Apostado (R$)<input type="number" id="edit-valor" min="0" step="0.01"></label>
+      <label class="field">ODD<input type="number" id="edit-odd" min="1.01" step="0.01"></label>
+    </div>
+    <div class="resultado-row">
+      <div class="resultado-label">Resultado</div>
+      <div class="resultado-btns">
+        <button class="res-btn" id="edit-btn-green" onclick="setEditResultado('green')">✅ GREEN</button>
+        <button class="res-btn" id="edit-btn-red" onclick="setEditResultado('red')">❌ RED</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn-save" onclick="salvarEdicao()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: UNIDADE -->
+<div class="modal-overlay" id="modal-unit">
+  <div class="modal">
+    <div class="modal-title">⚙️ Valor da Unidade</div>
+    <p style="color:#8A8FA8;font-size:13px;margin-bottom:16px">Define quanto vale 1 unidade (UN) nos relatórios.</p>
+    <label class="field" style="font-size:13px;color:#8A8FA8;font-weight:600;display:flex;flex-direction:column;gap:6px;">
+      Valor de 1 UN (R$)
+      <input type="number" id="unit-input" min="1" step="0.01" placeholder="50.00">
+    </label>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeUnitModal()">Cancelar</button>
+      <button class="btn-save" onclick="salvarUnit()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  ⚠️  COLOQUE AQUI SUAS CREDENCIAIS DO SUPABASE
+//  Você vai pegar esses valores no passo a passo abaixo
+// ══════════════════════════════════════════════════════
+const SUPABASE_URL = "https://dmeljdkvgiamchjuosyr.supabase.co ";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtZWxqZGt2Z2lhbWNoanVvc3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyOTM3ODksImV4cCI6MjA5ODg2OTc4OX0.uhqffSuRAclVUG5x4qeDNAWz6O-D1_KCBGAKiHLz_fw";
+// ══════════════════════════════════════════════════════
+
+const UNIT_KEY = "bettrack_unit";
+let UNIT = 50;
+let apostas = [];
+let resultado = null;
+let chartMode = "mensal";
+let currentUser = null;
+
+// ── SUPABASE HELPERS ──────────────────────────────────────────────────────
+const sb = {
+  headers() {
+    const h = { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": "Bearer " + (this._token || SUPABASE_KEY) };
+    return h;
+  },
+  _token: null,
+
+  async signUp(email, password) {
+    const r = await fetch(SUPABASE_URL + "/auth/v1/signup", {
+      method: "POST", headers: this.headers(),
+      body: JSON.stringify({ email, password })
+    });
+    return r.json();
+  },
+
+  async signIn(email, password) {
+    const r = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=password", {
+      method: "POST", headers: this.headers(),
+      body: JSON.stringify({ email, password })
+    });
+    const data = await r.json();
+    if (data.access_token) { this._token = data.access_token; }
+    return data;
+  },
+
+  async signOut() {
+    await fetch(SUPABASE_URL + "/auth/v1/logout", { method: "POST", headers: this.headers() });
+    this._token = null;
+  },
+
+  async getApostas() {
+    const r = await fetch(SUPABASE_URL + "/rest/v1/apostas?order=date.desc,created_at.desc", {
+      headers: { ...this.headers(), "Prefer": "return=representation" }
+    });
+    return r.json();
+  },
+
+  async insertAposta(a) {
+    const r = await fetch(SUPABASE_URL + "/rest/v1/apostas", {
+      method: "POST",
+      headers: { ...this.headers(), "Prefer": "return=representation" },
+      body: JSON.stringify({ date: a.date, valor: a.valor, odd: a.odd, resultado: a.resultado, lucro: a.lucro, bonus: a.bonus || 0, user_id: currentUser.id })
+    });
+    return r.json();
+  },
+
+  async updateAposta(id, a) {
+    const r = await fetch(SUPABASE_URL + "/rest/v1/apostas?id=eq." + id, {
+      method: "PATCH",
+      headers: { ...this.headers(), "Prefer": "return=representation" },
+      body: JSON.stringify({ date: a.date, valor: a.valor, odd: a.odd, resultado: a.resultado, lucro: a.lucro })
+    });
+    return r.json();
+  },
+
+  async deleteAposta(id) {
+    await fetch(SUPABASE_URL + "/rest/v1/apostas?id=eq." + id, {
+      method: "DELETE", headers: this.headers()
+    });
+  },
+
+  async getUnit() {
+    const r = await fetch(SUPABASE_URL + "/rest/v1/configuracoes?user_id=eq." + currentUser.id, {
+      headers: this.headers()
+    });
+    return r.json();
+  },
+
+  async upsertUnit(value) {
+    await fetch(SUPABASE_URL + "/rest/v1/configuracoes", {
+      method: "POST",
+      headers: { ...this.headers(), "Prefer": "resolution=merge-duplicates" },
+      body: JSON.stringify({ user_id: currentUser.id, unit_value: value })
+    });
+  }
+};
+
+// ── AUTH ──────────────────────────────────────────────────────────────────
+let authMode = "login"; // "login" | "signup"
+
+function toggleMode() {
+  authMode = authMode === "login" ? "signup" : "login";
+  document.getElementById("login-sub").textContent = authMode === "login" ? "Entre na sua conta" : "Crie sua conta gratuita";
+  document.getElementById("login-btn").textContent = authMode === "login" ? "Entrar" : "Criar conta";
+  document.getElementById("toggle-text").textContent = authMode === "login" ? "Não tem conta? " : "Já tem conta? ";
+  document.querySelector(".login-toggle a").textContent = authMode === "login" ? "Criar conta" : "Entrar";
+  document.getElementById("login-err").style.display = "none";
+}
+
+async function handleAuth() {
+  const email = document.getElementById("login-email").value.trim();
+  const password = document.getElementById("login-password").value;
+  const btn = document.getElementById("login-btn");
+  const err = document.getElementById("login-err");
+
+  if (!email || !password) { showLoginErr("Preencha e-mail e senha."); return; }
+
+  btn.disabled = true;
+  btn.textContent = authMode === "login" ? "Entrando..." : "Criando conta...";
+  err.style.display = "none";
+
+  try {
+    const data = authMode === "login" ? await sb.signIn(email, password) : await sb.signUp(email, password);
+
+    if (data.error || data.msg) {
+      const msg = data.error_description || data.msg || data.error || "Erro desconhecido";
+      showLoginErr(translateError(msg));
+    } else if (authMode === "signup" && !data.access_token) {
+      showLoginErr("Conta criada! Verifique seu e-mail para confirmar, depois faça login.");
+    } else {
+      currentUser = data.user;
+      sb._token = data.access_token;
+      localStorage.setItem("bettrack_token", data.access_token);
+      localStorage.setItem("bettrack_user", JSON.stringify(data.user));
+      await initApp();
+    }
+  } catch(e) {
+    showLoginErr("Erro de conexão. Verifique as credenciais do Supabase.");
+  }
+
+  btn.disabled = false;
+  btn.textContent = authMode === "login" ? "Entrar" : "Criar conta";
+}
+
+function translateError(msg) {
+  if (msg.includes("Invalid login")) return "E-mail ou senha incorretos.";
+  if (msg.includes("Email not confirmed")) return "Confirme seu e-mail antes de entrar.";
+  if (msg.includes("already registered")) return "E-mail já cadastrado. Faça login.";
+  if (msg.includes("Password should")) return "A senha deve ter pelo menos 6 caracteres.";
+  return msg;
+}
+
+function showLoginErr(msg) {
+  const el = document.getElementById("login-err");
+  el.textContent = msg;
+  el.style.display = "block";
+}
+
+async function handleLogout() {
+  await sb.signOut();
+  currentUser = null;
+  localStorage.removeItem("bettrack_token");
+  localStorage.removeItem("bettrack_user");
+  apostas = [];
+  document.getElementById("app-screen").style.display = "none";
+  document.getElementById("login-screen").style.display = "flex";
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+async function initApp() {
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("loading-overlay").style.display = "flex";
+
+  // Load unit preference
+  try {
+    const configs = await sb.getUnit();
+    if (configs && configs.length > 0) UNIT = parseFloat(configs[0].unit_value) || 50;
+    else { const local = localStorage.getItem(UNIT_KEY); if(local) UNIT = parseFloat(local); }
+  } catch { const local = localStorage.getItem(UNIT_KEY); if(local) UNIT = parseFloat(local); }
+
+  // Load apostas
+  try {
+    const data = await sb.getApostas();
+    apostas = Array.isArray(data) ? data : [];
+  } catch { apostas = []; }
+
+  document.getElementById("nav-user").textContent = currentUser?.email || "";
+  updateUnitDisplay();
+  document.getElementById("loading-overlay").style.display = "none";
+  document.getElementById("app-screen").style.display = "block";
+  renderDashboard();
+}
+
+// ── STARTUP ───────────────────────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", async () => {
+  // Check if Supabase is configured
+  if (SUPABASE_URL === "SEU_SUPABASE_URL") {
+    document.getElementById("config-notice").style.display = "block";
+    document.getElementById("login-btn").disabled = true;
+  }
+
+  // Try auto-login from saved token
+  const savedUser = localStorage.getItem("bettrack_user");
+  const savedToken = localStorage.getItem("bettrack_token");
+
+  if (savedUser && savedToken && SUPABASE_URL !== "SEU_SUPABASE_URL") {
+    try {
+      currentUser = JSON.parse(savedUser);
+      sb._token = savedToken;
+      // Verify token is still valid
+      const test = await sb.getApostas();
+      if (test && !test.message) {
+        await initApp();
+        return;
+      }
+    } catch {}
+    localStorage.removeItem("bettrack_token");
+    localStorage.removeItem("bettrack_user");
+  }
+
+  document.getElementById("loading-overlay").style.display = "none";
+  document.getElementById("login-screen").style.display = "flex";
+});
+
+// ── LOGIN ENTER KEY ───────────────────────────────────────────────────────
+document.getElementById("login-password").addEventListener("keydown", e => { if(e.key==="Enter") handleAuth(); });
+document.getElementById("login-email").addEventListener("keydown", e => { if(e.key==="Enter") document.getElementById("login-password").focus(); });
+
+// ── UNIT ──────────────────────────────────────────────────────────────────
+function updateUnitDisplay() {
+  const el = document.getElementById("unit-display");
+  if (el) el.textContent = "R$" + UNIT.toLocaleString("pt-BR", {minimumFractionDigits:0, maximumFractionDigits:2});
+}
+function openUnitModal() { document.getElementById("unit-input").value = UNIT; document.getElementById("modal-unit").classList.add("open"); }
+function closeUnitModal() { document.getElementById("modal-unit").classList.remove("open"); }
+async function salvarUnit() {
+  const v = parseFloat(document.getElementById("unit-input").value);
+  if (isNaN(v) || v <= 0) { showToast("⚠️ Valor inválido"); return; }
+  UNIT = v;
+  localStorage.setItem(UNIT_KEY, UNIT);
+  closeUnitModal();
+  renderDashboard();
+  showToast("✅ Unidade atualizada para R$" + UNIT.toFixed(2));
+  try { await sb.upsertUnit(v); } catch {}
+}
+
+// ── EDIT MODAL ────────────────────────────────────────────────────────────
+let editId = null;
+let editResultado = null;
+
+function openEditModal(id) {
+  const a = apostas.find(x => x.id === id);
+  if (!a) return;
+  editId = id; editResultado = a.resultado;
+  document.getElementById("edit-date").value = a.date;
+  document.getElementById("edit-valor").value = a.valor;
+  document.getElementById("edit-odd").value = a.odd;
+  document.getElementById("edit-btn-green").className = "res-btn" + (editResultado === "green" ? " green" : "");
+  document.getElementById("edit-btn-red").className = "res-btn" + (editResultado === "red" ? " red" : "");
+  document.getElementById("modal-edit").classList.add("open");
+}
+function closeEditModal() { document.getElementById("modal-edit").classList.remove("open"); editId = null; editResultado = null; }
+function setEditResultado(r) {
+  editResultado = r;
+  document.getElementById("edit-btn-green").className = "res-btn" + (r === "green" ? " green" : "");
+  document.getElementById("edit-btn-red").className = "res-btn" + (r === "red" ? " red" : "");
+}
+async function salvarEdicao() {
+  const date = document.getElementById("edit-date").value;
+  const v = parseFloat(document.getElementById("edit-valor").value);
+  const o = parseFloat(document.getElementById("edit-odd").value);
+  if (!date || isNaN(v) || v <= 0 || isNaN(o) || o <= 1 || !editResultado) { showToast("⚠️ Preencha todos os campos"); return; }
+  const lucro = editResultado === "green" ? parseFloat(((v * o) - v).toFixed(2)) : -v;
+  showSync();
+  try {
+    await sb.updateAposta(editId, { date, valor: v, odd: o, resultado: editResultado, lucro });
+    apostas = apostas.map(a => a.id === editId ? { ...a, date, valor: v, odd: o, resultado: editResultado, lucro } : a);
+    closeEditModal();
+    renderHistorico();
+    showToast("✏️ Aposta atualizada!");
+  } catch { showToast("❌ Erro ao salvar"); }
+  hideSync();
+}
+
+document.getElementById("modal-edit").addEventListener("click", function(e) { if(e.target===this) closeEditModal(); });
+document.getElementById("modal-unit").addEventListener("click", function(e) { if(e.target===this) closeUnitModal(); });
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
+const fmt = v => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(v);
+const fmtU = v => (v>=0?"+":"")+v.toFixed(2)+" U";
+const monthKey = d => d.slice(0,7);
+const monthLabel = k => {
+  const [y,m] = k.split("-");
+  return ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"][parseInt(m)-1]+"/"+y.slice(2);
+};
+
+function calcStats() {
+  const totalInvestido = apostas.reduce((s,a)=>s+a.valor,0);
+  const totalLucro = apostas.reduce((s,a)=>s+a.lucro,0);
+  const greens = apostas.filter(a=>a.resultado==="green").length;
+  const reds = apostas.filter(a=>a.resultado==="red").length;
+  const pctAcerto = (greens+reds)>0?(greens/(greens+reds)*100):0;
+  const unidades = totalLucro/UNIT;
+  const roi = totalInvestido>0?(totalLucro/totalInvestido*100):0;
+  const byMonth = {};
+  apostas.forEach(a=>{
+    const k = monthKey(a.date);
+    if(!byMonth[k]) byMonth[k]={investido:0,lucro:0,greens:0,reds:0};
+    byMonth[k].investido+=a.valor; byMonth[k].lucro+=a.lucro;
+    if(a.resultado==="green") byMonth[k].greens++; else byMonth[k].reds++;
+  });
+  return {totalInvestido,totalLucro,greens,reds,pctAcerto,unidades,roi,byMonth};
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const s = calcStats();
+  const months = Object.keys(s.byMonth).sort();
+  document.getElementById("kpi-grid").innerHTML = `
+    <div class="kpi-card"><span class="kpi-label">Lucro Total</span><span class="kpi-value ${s.totalLucro>=0?"green":"red"}">${fmt(s.totalLucro)}</span><span class="kpi-sub">${fmtU(s.unidades)}</span></div>
+    <div class="kpi-card"><span class="kpi-label">ROI</span><span class="kpi-value ${s.roi>=0?"green":"red"}">${(s.roi>=0?"+":"")+s.roi.toFixed(2)}%</span><span class="kpi-sub">sobre investido</span></div>
+    <div class="kpi-card"><span class="kpi-label">Total Investido</span><span class="kpi-value gold">${fmt(s.totalInvestido)}</span><span class="kpi-sub">${apostas.length} apostas</span></div>
+    <div class="kpi-card"><span class="kpi-label">% de Acerto</span><span class="kpi-value muted">${s.pctAcerto.toFixed(1)}%</span><span class="kpi-sub">${s.greens}G / ${s.reds}R</span></div>`;
+  const uEl = document.getElementById("unit-bar-value");
+  const fillEl = document.getElementById("unit-bar-fill");
+  uEl.textContent = fmtU(s.unidades);
+  uEl.className = s.unidades>=0?"green":"red";
+  fillEl.style.width = Math.min(Math.abs(s.unidades)/50*100,100)+"%";
+  fillEl.style.background = s.unidades>=0?"#00C27C":"#E84545";
+  renderChart(months, s.byMonth);
+  const tbody = document.getElementById("month-tbody");
+  if(!months.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">📊</div>Sem dados ainda</div></td></tr>';return;}
+  tbody.innerHTML = months.map(k=>{
+    const m = s.byMonth[k]; const u = m.lucro/UNIT;
+    const pct = ((m.greens/(m.greens+m.reds))*100).toFixed(0);
+    return `<tr><td style="font-weight:600">${monthLabel(k)}</td><td>${fmt(m.investido)}</td><td class="${m.lucro>=0?"green":"red"}" style="font-weight:600">${fmt(m.lucro)}</td><td class="${u>=0?"green":"red"}">${fmtU(u)}</td><td>${pct}%</td><td><span class="badge ${m.lucro>=0?"green":"red"}">${m.lucro>=0?"✅ Positivo":"❌ Negativo"}</span></td></tr>`;
+  }).join("");
+}
+
+// ── CHART ─────────────────────────────────────────────────────────────────
+function renderChart(months, byMonth) {
+  const canvas = document.getElementById("myChart");
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.parentElement.offsetWidth;
+  canvas.height = 220;
+  if(!months.length) return;
+  let data, colors;
+  if(chartMode==="mensal"){
+    data = months.map(k=>parseFloat((byMonth[k].lucro/UNIT).toFixed(2)));
+    colors = data.map(v=>v>=0?"#00C27C":"#E84545");
+  } else {
+    let acc=0;
+    data = months.map(k=>{acc+=byMonth[k].lucro/UNIT; return parseFloat(acc.toFixed(2));});
+    colors = data.map(v=>v>=0?"#00C27C":"#E84545");
+  }
+  const labels = months.map(monthLabel);
+  const maxAbs = Math.max(...data.map(Math.abs),1);
+  const padV = maxAbs*0.15;
+  const minVal = Math.min(...data)-padV, maxVal = Math.max(...data)+padV;
+  const padL=52,padR=16,padT=16,padB=36;
+  const W=canvas.width,H=canvas.height,chartW=W-padL-padR,chartH=H-padT-padB;
+  const n=data.length, barW=Math.min(Math.floor(chartW/n*0.55),40), gap=chartW/n;
+  const toY = v => padT+chartH-((v-minVal)/(maxVal-minVal))*chartH;
+  const zeroY = toY(0);
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle="#252836"; ctx.lineWidth=1;
+  [0.25,0.5,0.75,1].forEach(f=>{const y=padT+chartH*f;ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);ctx.stroke();});
+  ctx.strokeStyle="#3a3f52"; ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(padL,zeroY);ctx.lineTo(W-padR,zeroY);ctx.stroke();
+  ctx.fillStyle="#8A8FA8"; ctx.font="11px Inter,system-ui,sans-serif"; ctx.textAlign="right";
+  [0,0.25,0.5,0.75,1].forEach(f=>{const val=minVal+(maxVal-minVal)*(1-f);const y=padT+chartH*f;ctx.fillText(val.toFixed(1)+"U",padL-6,y+4);});
+  data.forEach((v,i)=>{
+    const x=padL+gap*i+gap/2-barW/2,yTop=v>=0?toY(v):zeroY,yBot=v>=0?zeroY:toY(v),h=Math.max(yBot-yTop,2),r=Math.min(4,h/2);
+    ctx.fillStyle=colors[i]; ctx.beginPath(); ctx.roundRect(x,yTop,barW,h,v>=0?[r,r,0,0]:[0,0,r,r]); ctx.fill();
+    if(n<=8){ctx.fillStyle=colors[i];ctx.font="bold 11px Inter,system-ui,sans-serif";ctx.textAlign="center";ctx.fillText((v>=0?"+":"")+v.toFixed(1),x+barW/2,v>=0?yTop-5:yBot+14);}
+  });
+  ctx.fillStyle="#8A8FA8"; ctx.font="12px Inter,system-ui,sans-serif"; ctx.textAlign="center";
+  labels.forEach((l,i)=>ctx.fillText(l,padL+gap*i+gap/2,H-padB+20));
+}
+function setChartMode(mode){
+  chartMode=mode;
+  document.getElementById("btn-mensal").classList.toggle("active",mode==="mensal");
+  document.getElementById("btn-acumulado").classList.toggle("active",mode==="acumulado");
+  const s=calcStats(); renderChart(Object.keys(s.byMonth).sort(),s.byMonth);
+}
+
+// ── NOVA ENTRADA ──────────────────────────────────────────────────────────
+function setResultado(r){
+  resultado=r;
+  document.getElementById("btn-green").className="res-btn"+(r==="green"?" green":"");
+  document.getElementById("btn-red").className="res-btn"+(r==="red"?" red":"");
+  const bf=document.getElementById("bonus-field");
+  if(r==="green") bf.classList.add("visible"); else{bf.classList.remove("visible");document.getElementById("f-bonus").value="";}
+  updatePreview();
+}
+function updatePreview(){
+  const v=parseFloat(document.getElementById("f-valor").value);
+  const o=parseFloat(document.getElementById("f-odd").value);
+  const bonus=resultado==="green"?(parseFloat(document.getElementById("f-bonus").value)||0):0;
+  const box=document.getElementById("preview-box"),val=document.getElementById("preview-value"),bd=document.getElementById("preview-breakdown");
+  if(!isNaN(v)&&!isNaN(o)&&resultado){
+    const lucroBase=resultado==="green"?parseFloat(((v*o)-v).toFixed(2)):-v;
+    const lucroTotal=parseFloat((lucroBase+bonus).toFixed(2));
+    box.style.display="flex"; box.style.borderColor=lucroTotal>=0?"#00C27C":"#E84545";
+    val.textContent=(lucroTotal>=0?"+":"")+fmt(lucroTotal);
+    val.className="preview-value "+(lucroTotal>=0?"green":"red");
+    bd.textContent=bonus>0?"ODD: "+fmt(lucroBase)+" + Bônus: "+fmt(bonus):"";
+  } else { box.style.display="none"; }
+}
+document.getElementById("f-valor").addEventListener("input", updatePreview);
+document.getElementById("f-odd").addEventListener("input", updatePreview);
+document.getElementById("f-bonus").addEventListener("input", updatePreview);
+
+async function salvarAposta(){
+  const date=document.getElementById("f-date").value;
+  const v=parseFloat(document.getElementById("f-valor").value);
+  const o=parseFloat(document.getElementById("f-odd").value);
+  const bonus=resultado==="green"?(parseFloat(document.getElementById("f-bonus").value)||0):0;
+  if(!date||isNaN(v)||v<=0||isNaN(o)||o<=1||!resultado){showToast("⚠️ Preencha todos os campos");return;}
+  const lucroBase=resultado==="green"?parseFloat(((v*o)-v).toFixed(2)):-v;
+  const lucro=parseFloat((lucroBase+bonus).toFixed(2));
+  const btn=document.getElementById("save-btn");
+  btn.disabled=true; btn.textContent="Salvando...";
+  showSync();
+  try {
+    const saved = await sb.insertAposta({date,valor:v,odd:o,resultado,lucro,bonus});
+    const novaAposta = Array.isArray(saved)?saved[0]:saved;
+    apostas.unshift({...novaAposta, date,valor:v,odd:o,resultado,lucro,bonus});
+    // Reset
+    document.getElementById("f-valor").value="";
+    document.getElementById("f-odd").value="";
+    document.getElementById("f-bonus").value="";
+    document.getElementById("bonus-field").classList.remove("visible");
+    resultado=null;
+    document.getElementById("btn-green").className="res-btn";
+    document.getElementById("btn-red").className="res-btn";
+    document.getElementById("preview-box").style.display="none";
+    showToast("✅ Aposta salva!");
+    showView("dashboard");
+  } catch { showToast("❌ Erro ao salvar. Tente novamente."); }
+  btn.disabled=false; btn.textContent="Salvar Aposta";
+  hideSync();
+}
+
+// ── HISTÓRICO ─────────────────────────────────────────────────────────────
+function renderHistorico(){
+  const s=calcStats();
+  const months=Object.keys(s.byMonth).sort().reverse();
+  const sel=document.getElementById("filter-month");
+  const cur=sel.value;
+  sel.innerHTML='<option value="all">Todos os meses</option>'+months.map(k=>`<option value="${k}">${monthLabel(k)}</option>`).join("");
+  if(cur&&cur!=="all") sel.value=cur;
+  const filter=sel.value;
+  const list=filter==="all"?[...apostas].sort((a,b)=>b.date.localeCompare(a.date)):apostas.filter(a=>monthKey(a.date)===filter).sort((a,b)=>b.date.localeCompare(a.date));
+  const tbody=document.getElementById("hist-tbody");
+  if(!list.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">🎯</div>Sem apostas neste período</div></td></tr>';return;}
+  tbody.innerHTML=list.map(a=>`<tr>
+    <td>${a.date.split("-").reverse().join("/")}</td>
+    <td>${fmt(a.valor)}</td>
+    <td>${(+a.odd).toFixed(2)}</td>
+    <td><span class="badge ${a.resultado}">${a.resultado==="green"?"✅ GREEN":"❌ RED"}</span></td>
+    <td class="${a.lucro>=0?"green":"red"}" style="font-weight:600">${a.lucro>=0?"+":""}${fmt(a.lucro)}${(a.bonus&&a.bonus>0)?`<span class="bonus-tag" title="Bônus: ${fmt(a.bonus)}">🎁</span>`:""}</td>
+    <td><div class="action-btns"><button class="edit-btn" onclick="openEditModal('${a.id}')" title="Editar">✏️</button><button class="delete-btn" onclick="excluir('${a.id}')" title="Excluir">🗑</button></div></td>
+  </tr>`).join("");
+}
+async function excluir(id){
+  if(!confirm("Excluir esta aposta?"))return;
+  showSync();
+  try {
+    await sb.deleteAposta(id);
+    apostas=apostas.filter(a=>a.id!==id);
+    renderHistorico();
+    showToast("🗑 Aposta removida");
+  } catch { showToast("❌ Erro ao excluir"); }
+  hideSync();
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────
+function showView(v){
+  document.querySelectorAll(".view").forEach(el=>el.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(el=>el.classList.remove("active"));
+  document.getElementById("view-"+v).classList.add("active");
+  if(v==="nova"){document.getElementById("f-date").value=new Date().toISOString().slice(0,10);}
+  if(v==="dashboard") renderDashboard();
+  if(v==="historico") renderHistorico();
+  document.querySelectorAll(".nav-btn").forEach(btn=>{if(btn.getAttribute("onclick")===`showView('${v}')`)btn.classList.add("active");});
+}
+
+// ── TOAST / SYNC ──────────────────────────────────────────────────────────
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2800);}
+function showSync(){document.getElementById("sync-indicator").classList.add("show");}
+function hideSync(){document.getElementById("sync-indicator").classList.remove("show");}
+
+window.addEventListener("resize",()=>{if(document.getElementById("view-dashboard").classList.contains("active"))renderDashboard();});
+</script>
+</body>
+</html>
